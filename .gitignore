@@ -1,2 +1,7 @@
+# development
 .direnv/
+
+# deployment
 .env
+public/
+pb_data/

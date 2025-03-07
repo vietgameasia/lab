@@ -6,6 +6,7 @@
     nixpkgs,
   }: let
     goVersion = 24;
+    nodeVersion = 22;
 
     supportedSystems = ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
     forEachSupportedSystem = f:
@@ -19,6 +20,7 @@
   in {
     overlays.default = final: prev: {
       go = final."go_1_${toString goVersion}";
+      nodejs = prev."nodejs_${toString nodeVersion}";
     };
 
     devShells = forEachSupportedSystem ({pkgs}: {
@@ -32,6 +34,10 @@
 
           # https://github.com/golangci/golangci-lint
           golangci-lint
+
+          node2nix
+          nodejs
+          nodePackages.pnpm
         ];
       };
     });
