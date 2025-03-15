@@ -20,5 +20,5 @@ RUN CGO_ENABLED=0 go build -o /go/bin/lab ./base/main.go
 
 FROM gcr.io/distroless/static-debian12
 COPY --from=node /node/src/public /public
-COPY --from=go /go/src/app/lab /
+COPY --from=go /go/bin/lab /
 ENTRYPOINT ["/lab", "serve"]
