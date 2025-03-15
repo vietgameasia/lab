@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { BenchmarkResponse, ProgramResponse } from "@/types/pb"
-import { Direction, Orientation, StackedBar } from "@unovis/ts"
+import { Direction, GroupedBar, Orientation } from "@unovis/ts"
 import {
   VisAxis,
   VisBulletLegend,
-  VisStackedBar,
+  VisGroupedBar,
   VisTooltip,
   VisXYContainer,
 } from "@unovis/vue"
@@ -30,7 +30,7 @@ const tickFormat = (_: unknown, i: number) =>
   `${props.data[i].expand?.program.name}${props.data[i].raytracing ? " [RT]" : ""}`
 
 const triggers = {
-  [StackedBar.selectors.bar]: (d: Data) =>
+  [GroupedBar.selectors.bar]: (d: Data) =>
     `
     <span class="font-bold text-sm">${d.expand?.program?.name}</span>
 ${d.raytracing ? '<span class="text-xs uppercase">RAY-TRACING</span>' : ""}<br/>
@@ -53,7 +53,7 @@ const items = computed(() => [
       height="100%"
       class="h-full"
     >
-      <VisStackedBar :x :y :orientation="Orientation.Horizontal" />
+      <VisGroupedBar :x :y :orientation="Orientation.Horizontal" />
       <VisAxis type="x" />
       <VisAxis
         type="y"
