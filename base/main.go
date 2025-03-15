@@ -27,6 +27,12 @@ func main() {
 		// serves static files from the provided public dir (if exists)
 		se.Router.GET("/{path...}", apis.Static(os.DirFS("./public"), true))
 
+		// register a global middleware
+		se.Router.BindFunc(func(e *core.RequestEvent) error {
+			e.Response.Header().Del("X-Frame-Options")
+			return e.Next()
+		})
+
 		return se.Next()
 	})
 
