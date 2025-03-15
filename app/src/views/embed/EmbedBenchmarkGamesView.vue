@@ -8,6 +8,7 @@ import {
   type ProgramResponse,
 } from "@/types/pb"
 import { computed, ref, watch } from "vue"
+import src from "@/assets/vietgame.png"
 
 const route = useRoute()
 
@@ -53,19 +54,25 @@ watch([resolutions], () => (selected.value = resolutions.value?.[0]))
 </script>
 
 <template>
-  <main v-if="data && resolutions" class="flex h-screen flex-col gap-3">
+  <main v-if="data && resolutions" class="flex h-screen flex-col gap-3 p-3">
     <div>
-      <h1 class="mb-0 text-xl font-bold">Gaming Performance</h1>
+      <a href="https://vietgame.asia/">
+        <img
+          :src
+          class="float-right h-10 dark:hue-rotate-180 dark:invert-100"
+        />
+      </a>
+      <h1 class="mb-0 text-xl font-bold">{{ $t("benchmark.gaming") }}</h1>
       <p class="text-sm text-neutral-500 dark:text-neutral-400">
         {{ selected?.label }}<br />
-        Higher is better
+        {{ $t("common.higherIsBetter") }}
       </p>
     </div>
     <div>
       <USelectMenu v-model="selected" :items="resolutions" class="w-48" />
     </div>
     <div class="flex-1">
-      <GraphGames :data class="h-full" />
+      <GraphGames :data />
     </div>
   </main>
 </template>

@@ -8,15 +8,21 @@ import {
   VisTooltip,
   VisXYContainer,
 } from "@unovis/vue"
+import { computed } from "vue"
+import { useI18n } from "vue-i18n"
+
+type Data = BenchmarkResponse<{ program: ProgramResponse }>
 
 const props = defineProps<{
-  data: BenchmarkResponse<{ program: ProgramResponse }>[]
+  data: Data[]
 }>()
+
+const { t } = useI18n({ useScope: "parent" })
 
 const x = (_: BenchmarkResponse, i: number) => i
 const y = [
-  (d: BenchmarkResponse) => d.average_fps,
   (d: BenchmarkResponse) => d.min_fps,
+  (d: BenchmarkResponse) => d.average_fps,
   (d: BenchmarkResponse) => d.max_fps,
 ]
 
@@ -24,34 +30,45 @@ const tickFormat = (_: unknown, i: number) =>
   `${props.data[i].expand?.program.name}${props.data[i].raytracing ? " [RT]" : ""}`
 
 const triggers = {
-  [StackedBar.selectors.bar]: (d: BenchmarkResponse) =>
+  [StackedBar.selectors.bar]: (d: Data) =>
     `
-      <span>${d.average_fps}</span>
-    `,
+    <span class="font-bold text-sm">${d.expand?.program?.name}</span>
+${d.raytracing ? '<span class="text-xs uppercase">RAY-TRACING</span>' : ""}<br/>
+    <span class="text-sm">${t("legend.fps.average")}: ${d.average_fps}</span>
+`,
 }
 
-const items = [
-  { name: "Average FPS" },
-  { name: "Minimum FPS" },
-  { name: "Maximum FPS" },
-]
+const items = computed(() => [
+  { name: t("legend.fps.minimum") },
+  { name: t("legend.fps.average") },
+  { name: t("legend.fps.maximum") },
+])
 </script>
 
 <template>
-  <VisXYContainer :data :yDirection="Direction.South">
-    <VisStackedBar :x :y :orientation="Orientation.Horizontal" />
-    <VisAxis type="x" />
-    <VisAxis
-      type="y"
-      :tickFormat
-      :tickTextWidth="100"
-      :numTicks="data.length"
-      :gridLine="false"
-    />
-    <VisTooltip :triggers />
-  </VisXYContainer>
+  <div class="flex h-full flex-col">
+    <VisXYContainer
+      :data
+      :yDirection="Direction.South"
+      height="100%"
+      class="h-full"
+    >
+      <VisStackedBar :x :y :orientation="Orientation.Horizontal" />
+      <VisAxis type="x" />
+      <VisAxis
+        type="y"
+        :tickFormat
+        :tickTextWidth="100"
+        :numTicks="data.length"
+        :gridLine="false"
+        tickTextFitMode="trim"
+        tickTextTrimType="end"
+      />
+      <VisTooltip :triggers />
+    </VisXYContainer>
 
-  <div>
-    <VisBulletLegend :items />
+    <div>
+      <VisBulletLegend :items />
+    </div>
   </div>
 </template>
