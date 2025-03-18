@@ -5,6 +5,9 @@ import { useAsyncState } from "@vueuse/core"
 import {
   Collections,
   type BenchmarkResponse,
+  type CpuResponse,
+  type EnvironmentResponse,
+  type GpuVariantsResponse,
   type ProgramResponse,
 } from "@/types/pb"
 import { computed, ref, watch } from "vue"
@@ -24,6 +27,23 @@ const { state: resolutions } = useAsyncState(
         value: resolution.id,
       }))
     ),
+  null,
+  { immediate: true }
+)
+
+const { state: environment } = useAsyncState(
+  pb.collection(Collections.Environment).getOne<
+    Pick<
+      EnvironmentResponse<{
+        cpu: Pick<CpuResponse, "name">
+        gpu_variant: Pick<GpuVariantsResponse, "name">
+      }>,
+      "expand"
+    >
+  >(route.params.id as string, {
+    expand: "cpu, gpu_variant",
+    fields: "expand.cpu.name, expand.gpu_variant.name",
+  }),
   null,
   { immediate: true }
 )
@@ -54,7 +74,10 @@ watch([resolutions], () => (selected.value = resolutions.value?.[0]))
 </script>
 
 <template>
-  <main v-if="data && resolutions" class="flex h-screen flex-col gap-3 p-3">
+  <main
+    v-if="data && resolutions && environment"
+    class="flex h-screen flex-col gap-3 p-3"
+  >
     <div>
       <a href="https://vietgame.asia/">
         <img
@@ -64,7 +87,9 @@ watch([resolutions], () => (selected.value = resolutions.value?.[0]))
       </a>
       <h1 class="mb-0 text-xl font-bold">{{ $t("benchmark.gaming") }}</h1>
       <p class="text-sm text-neutral-500 dark:text-neutral-400">
-        {{ selected?.label }}<br />
+        {{ environment.expand?.cpu.name }} &middot;
+        {{ environment.expand?.gpu_variant.name }} &middot;
+        {{ selected?.label }}
       </p>
     </div>
     <div>

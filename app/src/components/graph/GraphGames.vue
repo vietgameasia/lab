@@ -33,9 +33,12 @@ const triggers = {
   [GroupedBar.selectors.bar]: (d: Data) =>
     `
     <span class="font-bold text-sm">${d.expand?.program?.name}</span>
+    <span class="text-sm">(${d.disambiguation})</span>
     ${d.raytracing ? '<span class="text-xs uppercase">RAY-TRACING</span>' : ""}
     <br/>
-    <span class="text-sm">${t("legend.fps.average")}: ${t("legend.fps.count", [d.average_fps])}</span><br/>
+    <span class="text-sm">${t("legend.fps.average")}: ${t("legend.fps.count", [d.average_fps])}</span>
+    ${d.score ? `&middot; <span class="text-sm">${t("legend.fps.score")}: ${d.score}</span>` : ""}
+    <br/>
     ${
       d.min_fps || d.max_fps
         ? `<span class="text-xs">${t("legend.fps.range")}: ${t(
