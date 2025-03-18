@@ -9,10 +9,12 @@ const en = {
   },
   legend: {
     fps: {
-      average: "FPS average",
-      minimum: "FPS minimum",
-      maximum: "FPS maximum",
-      count: "{} FPS",
+      average: "Average",
+      minimum: "Minimum",
+      maximum: "Maximum",
+      low: "0.1%-1% low",
+      range: "Minimum - Maximum",
+      count: "{0} FPS",
     },
   },
 }

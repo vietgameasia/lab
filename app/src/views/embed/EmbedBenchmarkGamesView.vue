@@ -65,7 +65,6 @@ watch([resolutions], () => (selected.value = resolutions.value?.[0]))
       <h1 class="mb-0 text-xl font-bold">{{ $t("benchmark.gaming") }}</h1>
       <p class="text-sm text-neutral-500 dark:text-neutral-400">
         {{ selected?.label }}<br />
-        {{ $t("common.higherIsBetter") }}
       </p>
     </div>
     <div>

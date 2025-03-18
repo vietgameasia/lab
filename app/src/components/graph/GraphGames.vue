@@ -33,8 +33,18 @@ const triggers = {
   [GroupedBar.selectors.bar]: (d: Data) =>
     `
     <span class="font-bold text-sm">${d.expand?.program?.name}</span>
-${d.raytracing ? '<span class="text-xs uppercase">RAY-TRACING</span>' : ""}<br/>
-    <span class="text-sm">${t("legend.fps.average")}: ${d.average_fps}</span>
+    ${d.raytracing ? '<span class="text-xs uppercase">RAY-TRACING</span>' : ""}
+    <br/>
+    <span class="text-sm">${t("legend.fps.average")}: ${t("legend.fps.count", [d.average_fps])}</span><br/>
+    ${
+      d.min_fps || d.max_fps
+        ? `<span class="text-xs">${t("legend.fps.range")}: ${t(
+            "legend.fps.count",
+            [d.min_fps]
+          )} - ${t("legend.fps.count", [d.max_fps])}</span><br/>`
+        : ""
+    }
+    ${d.low_fps ? `<span class="text-xs">${t("legend.fps.low")}: ${t("legend.fps.count", [d.low_fps])}</span><br/>` : ""}
 `,
 }
 
@@ -54,7 +64,7 @@ const items = computed(() => [
       class="h-full"
     >
       <VisGroupedBar :x :y :orientation="Orientation.Horizontal" />
-      <VisAxis type="x" />
+      <VisAxis type="x" label="FPS" :numTicks="10" />
       <VisAxis
         type="y"
         :tickFormat

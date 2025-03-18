@@ -9,10 +9,12 @@ const vi = {
   },
   legend: {
     fps: {
-      average: "FPS trung bình",
-      minimum: "FPS thấp nhất",
-      maximum: "FPS cao nhất",
-      count: "{} FPS",
+      average: "Trung bình",
+      minimum: "Thấp nhất",
+      maximum: "Cao nhất",
+      low: "0.1%-1% low",
+      range: "Thấp - Cao",
+      count: "{0} FPS",
     },
   },
 }
