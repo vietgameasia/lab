@@ -37,35 +37,23 @@ const { state: environment } = useAsyncState(
       EnvironmentResponse<{
         cpu: Pick<CpuResponse, "name">
         gpu_variant: Pick<GpuVariantsResponse, "name">
+        benchmark_via_environment: BenchmarkResponse<{
+          program: ProgramResponse
+        }>[]
       }>,
       "expand"
     >
   >(route.params.id as string, {
-    expand: "cpu, gpu_variant",
-    fields: "expand.cpu.name, expand.gpu_variant.name",
+    expand: "cpu, gpu_variant,  benchmark_via_environment.program",
+    fields:
+      "expand.cpu.name, expand.gpu_variant.name, expand.benchmark_via_environment",
   }),
   null,
   { immediate: true }
 )
 
-const { state } = useAsyncState(
-  pb
-    .collection(Collections.Benchmark)
-    .getFullList<BenchmarkResponse<{ program: ProgramResponse }>>({
-      filter: pb.filter(
-        "environment = {:environment} && average_fps > 0 && program.type = 'game'",
-        {
-          environment: route.params.id,
-        }
-      ),
-      expand: "program",
-    }),
-  null,
-  { immediate: true }
-)
-
 const data = computed(() =>
-  state.value?.filter(
+  environment.value?.expand?.benchmark_via_environment.filter(
     (benchmark) => benchmark.resolution == selected.value?.value
   )
 )

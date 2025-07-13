@@ -6,6 +6,9 @@ const en = {
     gaming: "Gaming Performance",
     productivity: "Productivity Performance",
     synthetic: "Synthetic Benchmark",
+    compare: {
+      gaming: "Gaming Performance Comparison",
+    },
   },
   legend: {
     fps: {
