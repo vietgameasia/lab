@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { pb } from "@/utils/client"
-import { useRoute } from "vue-router"
+import { useRoute, type LocationQueryValue } from "vue-router"
 import { useAsyncState } from "@vueuse/core"
 import {
   Collections,
@@ -12,6 +12,7 @@ import {
 } from "@/types/pb"
 import { computed, ref, watch } from "vue"
 import src from "@/assets/vietgame.png"
+import GraphGamesCompare from "@/components/graph/GraphGamesCompare.vue"
 
 const route = useRoute()
 
@@ -33,48 +34,65 @@ const { state: resolutions } = useAsyncState(
 
 const { state: environments } = useAsyncState(
   pb.collection(Collections.Environment).getFullList<
-    Pick<
-      EnvironmentResponse<{
-        cpu: Pick<CpuResponse, "name">
-        gpu_variant: Pick<GpuVariantsResponse, "name">
-        benchmark_via_environment: BenchmarkResponse<{
-          program: ProgramResponse
-        }>[]
-      }>,
-      "expand"
-    >
+    EnvironmentResponse<{
+      cpu: Pick<CpuResponse, "name">
+      gpu_variant: Pick<GpuVariantsResponse, "name">
+      benchmark_via_environment: BenchmarkResponse<{
+        program: ProgramResponse
+      }>[]
+    }>
   >({
     expand: "cpu, gpu_variant, benchmark_via_environment.program",
     fields:
       "expand.cpu.name, expand.gpu_variant.name, expand.benchmark_via_environment",
+    filter: pb.filter(`(${buildFilter("id", route.query.id)})`),
+    sort: "+benchmark_via_environment.disambiguation",
   }),
   null,
   { immediate: true }
 )
 
-const { state } = useAsyncState(
-  pb
-    .collection(Collections.Benchmark)
-    .getFullList<BenchmarkResponse<{ program: ProgramResponse }>>({
-      filter: pb.filter(
-        "environment = {:environment} && average_fps > 0 && program.type = 'game'",
-        {
-          environment: route.params.id,
-        }
-      ),
-      expand: "program",
-    }),
-  null,
-  { immediate: true }
+const data = computed(() =>
+  environments.value?.map((environment) => ({
+    ...environment,
+    expand: {
+      ...environment.expand,
+      benchmark_via_environment:
+        environment.expand?.benchmark_via_environment.filter(
+          (benchmark) => benchmark.resolution == selected.value?.value
+        ),
+    },
+  }))
 )
 
-const data = computed(() =>
-  state.value?.filter(
-    (benchmark) => benchmark.resolution == selected.value?.value
+const devices = computed(() =>
+  environments.value?.map(
+    ({ expand }) => `${expand?.cpu.name}, ${expand?.gpu_variant.name}`
   )
 )
 
 watch([resolutions], () => (selected.value = resolutions.value?.[0]))
+
+function buildFilter(
+  key: string,
+  id: LocationQueryValue[] | LocationQueryValue
+) {
+  if (!id) {
+    return ""
+  }
+
+  if (typeof id == "string") {
+    return pb.filter(`${key} = {:environment}`, { environment: id })
+  }
+
+  return id
+    .map((environment) =>
+      pb.filter(`${key} = {:environment}`, {
+        environment,
+      })
+    )
+    .join(" || ")
+}
 </script>
 
 <template>
@@ -89,16 +107,20 @@ watch([resolutions], () => (selected.value = resolutions.value?.[0]))
           class="float-right h-10 dark:hue-rotate-180 dark:invert-100"
         />
       </a>
-      <h1 class="mb-0 text-xl font-bold">{{ $t("benchmark.gaming") }}</h1>
+      <h1 class="mb-0 text-xl font-bold">
+        {{ $t("benchmark.compare.gaming") }}
+      </h1>
       <p class="text-sm text-neutral-500 dark:text-neutral-400">
-        {{ selected?.label }}
+        <div v-if="devices">
+          <div v-for="device in devices" :key="device">{{ device }}</div>
+        </div>
       </p>
     </div>
     <div>
       <USelectMenu v-model="selected" :items="resolutions" class="w-48" />
     </div>
     <div class="flex-1">
-      <GraphGames :data />
+      <GraphGamesCompare :data />
     </div>
   </main>
 </template>

@@ -10,7 +10,7 @@ const router = createRouter({
       component: EmbedBenchmarkGamesView,
     },
     {
-      path: "/embed/benchmark/:id/games/compare",
+      path: "/embed/benchmark/compare/games",
       component: EmbedBenchmarkGamesCompareView,
     },
   ],

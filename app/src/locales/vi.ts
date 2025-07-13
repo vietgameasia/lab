@@ -6,6 +6,9 @@ const vi = {
     gaming: "Hiệu năng Gaming",
     productivity: "Hiệu năng Làm việc",
     synthetic: "Hiệu năng Thử nghiệm",
+    compare: {
+      gaming: "So sánh hiệu năng Gaming",
+    },
   },
   legend: {
     fps: {
