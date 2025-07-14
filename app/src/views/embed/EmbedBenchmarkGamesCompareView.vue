@@ -71,6 +71,12 @@ const devices = computed(() =>
   )
 )
 
+const games = computed(() =>
+  Array.isArray(route.query.games)
+    ? route.query.games.filter((game) => game != null)
+    : [route.query.games].filter((game) => game != null)
+)
+
 watch([resolutions], () => (selected.value = resolutions.value?.[0]))
 
 function buildFilter(
@@ -110,17 +116,20 @@ function buildFilter(
       <h1 class="mb-0 text-xl font-bold">
         {{ $t("benchmark.compare.gaming") }}
       </h1>
-      <p class="text-sm text-neutral-500 dark:text-neutral-400">
-        <div v-if="devices">
-          <div v-for="device in devices" :key="device">{{ device }}</div>
+      <div
+        v-if="devices"
+        class="text-sm text-neutral-500 dark:text-neutral-400"
+      >
+        <div v-for="device in devices" :key="device">
+          {{ device }}
         </div>
-      </p>
+      </div>
     </div>
     <div>
       <USelectMenu v-model="selected" :items="resolutions" class="w-48" />
     </div>
     <div class="flex-1">
-      <GraphGamesCompare :data />
+      <GraphGamesCompare :data :games />
     </div>
   </main>
 </template>

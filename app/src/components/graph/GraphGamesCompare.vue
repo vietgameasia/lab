@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import type {
   BenchmarkResponse,
+  CpuResponse,
   EnvironmentResponse,
+  GpuVariantsResponse,
   ProgramResponse,
 } from "@/types/pb"
-import { Direction, GroupedBar, Orientation } from "@unovis/ts"
+import {
+  BulletLegendOrientation,
+  Direction,
+  GroupedBar,
+  Orientation,
+} from "@unovis/ts"
 import {
   VisAxis,
   VisBulletLegend,
@@ -16,13 +23,14 @@ import { computed } from "vue"
 import { useI18n } from "vue-i18n"
 
 type Data = EnvironmentResponse<{
-  benchmark_via_environment:
-    | BenchmarkResponse<{ program: ProgramResponse }>[]
-    | undefined
+  cpu?: Pick<CpuResponse, "name">
+  gpu_variant?: Pick<GpuVariantsResponse, "name">
+  benchmark_via_environment?: BenchmarkResponse<{ program: ProgramResponse }>[]
 }>
 
 const props = defineProps<{
   data: Data[]
+  games: string[]
 }>()
 
 const grouped = computed(() =>
@@ -31,8 +39,9 @@ const grouped = computed(() =>
       props.data
         .flatMap((environment) => environment.expand?.benchmark_via_environment)
         .filter((benchmark) => typeof benchmark != "undefined")
-        .sort((a, b) => a.disambiguation.localeCompare(b.disambiguation))
-        .filter((benchmark) => !benchmark.raytracing),
+        //.sort((a, b) => a.disambiguation.localeCompare(b.disambiguation))
+        .filter((benchmark) => !benchmark.raytracing)
+        .filter((benchmark) => props.games.includes(benchmark.program)),
       (environment) => environment.expand?.program.name ?? ""
     )
   ).map((program) => program?.slice(0, 2))
@@ -78,6 +87,12 @@ const triggers = {
       )
       .join("<br/>"),
 }
+
+const items = computed(() =>
+  props.data.map(({ expand }) => ({
+    name: `${expand?.cpu?.name} - ${expand?.gpu_variant?.name}`,
+  }))
+)
 </script>
 
 <template>
@@ -102,5 +117,13 @@ const triggers = {
 
       <VisTooltip :triggers />
     </VisXYContainer>
+
+    <div>
+      <VisBulletLegend
+        :items
+        :orientation="BulletLegendOrientation.Vertical"
+        label-max-width="100%"
+      />
+    </div>
   </div>
 </template>
